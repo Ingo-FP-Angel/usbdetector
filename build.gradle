@@ -12,5 +12,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("de.theonebrack.Main")
+    mainClass.set("de.ingofpangel.Main")
 }
