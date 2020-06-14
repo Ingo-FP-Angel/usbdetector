@@ -24,27 +24,39 @@ public class Main {
                 DeviceDescriptor descriptor = new DeviceDescriptor();
                 result = LibUsb.getDeviceDescriptor(device, descriptor);
                 if (result != LibUsb.SUCCESS) throw new LibUsbException("Unable to read device descriptor", result);
+
+                System.out.println(System.lineSeparator()
+                        + String.format("0x%04x", descriptor.idVendor())
+                        + "/"
+                        + String.format("0x%04x", descriptor.idProduct()));
+
                 ConfigDescriptor configDescriptor = new ConfigDescriptor();
                 result = LibUsb.getConfigDescriptor(device, (byte) 0, configDescriptor);
-                if (result != LibUsb.SUCCESS) throw new LibUsbException("Unable to read config descriptor", result);
-
-                System.out.println(String.format("0x%04x", descriptor.idVendor()) + "/" + String.format("0x%04x", descriptor.idProduct()));
+                if (result != LibUsb.SUCCESS) {
+                    var ex = new LibUsbException("Unable to read config descriptor", result);
+                    System.out.println(ex.getMessage());
+                    continue;
+                }
 
                 DeviceHandle handle = new DeviceHandle();
                 result = LibUsb.open(device, handle);
-                if (result != LibUsb.SUCCESS) continue;
+                if (result != LibUsb.SUCCESS) {
+                    var ex = new LibUsbException("Unable to open device handle", result);
+                    System.out.println(ex.getMessage());
+                    continue;
+                }
 
                 StringBuffer bufferManufacturer = new StringBuffer(30);
                 LibUsb.getStringDescriptorAscii(handle, descriptor.iManufacturer(), bufferManufacturer);
-                System.out.println(bufferManufacturer);
+                System.out.println("Manufacturer: " + bufferManufacturer);
 
                 StringBuffer bufferProduct = new StringBuffer(30);
                 LibUsb.getStringDescriptorAscii(handle, descriptor.iProduct(), bufferProduct);
-                System.out.println(bufferProduct);
+                System.out.println("Product     : " + bufferProduct);
 
                 StringBuffer bufferConfiguration = new StringBuffer(30);
                 LibUsb.getStringDescriptorAscii(handle, configDescriptor.iConfiguration(), bufferConfiguration);
-                System.out.println(bufferConfiguration);
+                System.out.println("Config      : " + bufferConfiguration);
 
                 LibUsb.close(handle);
 
